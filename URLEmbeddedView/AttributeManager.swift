@@ -10,50 +10,50 @@ import Foundation
 
 public final class AttributeManager {
     public enum Style {
-        case Title, Description, Domain, NoDataTitle
+        case title, description, domain, noDataTitle
         
         var font: UIFont {
             switch self {
-            case .Title       : return .boldSystemFontOfSize(16)
-            case .Description : return .systemFontOfSize(14)
-            case .Domain      : return .systemFontOfSize(10)
-            case .NoDataTitle : return .systemFontOfSize(16)
+            case .title       : return .boldSystemFont(ofSize: 16)
+            case .description : return .systemFont(ofSize: 14)
+            case .domain      : return .systemFont(ofSize: 10)
+            case .noDataTitle : return .systemFont(ofSize: 16)
             }
         }
         
         var numberOfLines: Int {
             switch self {
-            case .Title, .NoDataTitle : return 2
-            case .Description         : return 1
-            case .Domain              : return 1
+            case .title, .noDataTitle : return 2
+            case .description         : return 1
+            case .domain              : return 1
             }
         }
         
         var fontColor: UIColor {
             switch self {
-            case .Description, .Domain, .NoDataTitle, .Title:
-                return .blackColor()
+            case .description, .domain, .noDataTitle, .title:
+                return .black()
             }
         }
     }
     
     enum Attribute {
-        case Font, NumberOfLines,FontColor
+        case font, numberOfLines,fontColor
     }
     
     var didChangeValue: ((Style, Attribute, Any) -> Void)?
-    private let style: Style
+    fileprivate let style: Style
     
     public var font: UIFont {
-        didSet { didChangeValue?(style, .Font, font) }
+        didSet { didChangeValue?(style, .font, font) }
     }
     
     public var numberOfLines: Int {
-        didSet { didChangeValue?(style, .NumberOfLines, numberOfLines) }
+        didSet { didChangeValue?(style, .numberOfLines, numberOfLines) }
     }
     
     public var fontColor: UIColor {
-        didSet { didChangeValue?(style, .FontColor, fontColor) }
+        didSet { didChangeValue?(style, .fontColor, fontColor) }
     }
     
     init(style: Style) {
@@ -63,7 +63,7 @@ public final class AttributeManager {
         self.fontColor = style.fontColor
     }
     
-    func attributedText(string: String) -> NSAttributedString {
+    func attributedText(_ string: String) -> NSAttributedString {
         let attributes: [String : AnyObject] = [
             NSFontAttributeName : font,
             NSForegroundColorAttributeName : fontColor

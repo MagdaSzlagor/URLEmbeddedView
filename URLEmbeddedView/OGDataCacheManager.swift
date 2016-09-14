@@ -11,30 +11,30 @@ import CoreData
 
 final class OGDataCacheManager {
     static let sharedInstance = OGDataCacheManager()
-    private static let TimeOfExpirationForOGDataCacheKey = "TimeOfExpirationForOGDataCache"
+    fileprivate static let TimeOfExpirationForOGDataCacheKey = "TimeOfExpirationForOGDataCache"
     
     
-    lazy var applicationDocumentsDirectory: NSURL = {
-        let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
+    lazy var applicationDocumentsDirectory: URL = {
+        let urls = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return urls[urls.count-1]
     }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {
-        let modelURL = NSBundle(forClass: self.dynamicType).URLForResource("URLEmbeddedViewOGData", withExtension: "momd")!
-        return NSManagedObjectModel(contentsOfURL: modelURL)!
+        let modelURL = Bundle(for: type(of: self)).url(forResource: "URLEmbeddedViewOGData", withExtension: "momd")!
+        return NSManagedObjectModel(contentsOf: modelURL)!
     }()
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("URLEmbeddedViewOGData.sqlite")
+        let url = self.applicationDocumentsDirectory.appendingPathComponent("URLEmbeddedViewOGData.sqlite")
         var failureReason = "There was an error creating or loading the application's saved data."
         let options = [NSMigratePersistentStoresAutomaticallyOption : true, NSInferMappingModelAutomaticallyOption : true]
         do {
-            try coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: options)
+            try coordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: url, options: options)
         } catch {
             var dict = [String: AnyObject]()
-            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
-            dict[NSLocalizedFailureReasonErrorKey] = failureReason
+            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data" as AnyObject?
+            dict[NSLocalizedFailureReasonErrorKey] = failureReason as AnyObject?
             
             dict[NSUnderlyingErrorKey] = error as NSError
             let wrappedError = NSError(domain: "URLEmbeddedView-OGDataCache Error", code: 9999, userInfo: dict)
@@ -46,20 +46,20 @@ final class OGDataCacheManager {
     
     lazy var writerManagedObjectContext: NSManagedObjectContext = {
         let coordinator = self.persistentStoreCoordinator
-        var managedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+        var managedObjectContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = coordinator
         return managedObjectContext
     }()
     
     lazy var mainManagedObjectContext: NSManagedObjectContext = {
-        var managedObjectContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
-        managedObjectContext.parentContext = self.writerManagedObjectContext
+        var managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        managedObjectContext.parent = self.writerManagedObjectContext
         return managedObjectContext
     }()
     
     lazy var updateManagedObjectContext: NSManagedObjectContext = {
-        var managedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-        managedObjectContext.parentContext = self.mainManagedObjectContext
+        var managedObjectContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        managedObjectContext.parent = self.mainManagedObjectContext
         return managedObjectContext
     }()
     
@@ -75,8 +75,8 @@ final class OGDataCacheManager {
 //        }
 //    }
     
-    var updateInterval: NSTimeInterval = {
-        let ud = NSUserDefaults.standardUserDefaults()
+    var updateInterval: TimeInterval = {
+        let ud = UserDefaults.standard
         guard let updateInterval = ud.updateIntervalForOGData else {
             let interval = 10.days
             ud.updateIntervalForOGData = interval
@@ -84,17 +84,17 @@ final class OGDataCacheManager {
         }
         return updateInterval
     }() {
-        didSet { NSUserDefaults.standardUserDefaults().updateIntervalForOGData = updateInterval }
+        didSet { UserDefaults.standard.updateIntervalForOGData = updateInterval }
     }
 }
 
 extension OGDataCacheManager {
-    func delete(object: NSManagedObject, completion: ((NSError?) -> Void)?) {
-        object.managedObjectContext?.deleteObject(object)
+    func delete(_ object: NSManagedObject, completion: ((NSError?) -> Void)?) {
+        object.managedObjectContext?.delete(object)
         saveContext(completion)
     }
     
-    func saveContext (completion: ((NSError?) -> Void)?) {
+    func saveContext (_ completion: ((NSError?) -> Void)?) {
         saveContext(updateManagedObjectContext, success: { [weak self] in
             guard let mainManagedObjectContext = self?.mainManagedObjectContext else {
                 completion?(NSError(domain: "mainManagedObjectContext is not avairable", code: 9999, userInfo: nil))
@@ -121,11 +121,11 @@ extension OGDataCacheManager {
         })
     }
     
-    private func saveContext(context: NSManagedObjectContext, success: (() -> Void)?, failure: ((NSError) -> Void)?) {
+    fileprivate func saveContext(_ context: NSManagedObjectContext, success: (() -> Void)?, failure: ((NSError) -> Void)?) {
         if !context.hasChanges {
             success?()
         }
-        context.performBlock {
+        context.perform {
             do {
                 try context.save()
                 success?()

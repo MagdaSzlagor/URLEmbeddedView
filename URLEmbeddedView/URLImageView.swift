@@ -10,8 +10,8 @@ import UIKit
 import MisterFusion
 
 final class URLImageView: UIImageView {
-    private let activityView = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
-    private var uuidString: String?
+    fileprivate let activityView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    fileprivate var uuidString: String?
     var activityViewHidden: Bool = false
     var stopTaskWhenCancel = false
     
@@ -24,7 +24,7 @@ final class URLImageView: UIImageView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func initialize() {
+    fileprivate func initialize() {
         activityView.hidesWhenStopped = true
         addLayoutSubview(activityView, andConstraints:
             activityView.Width |==| 30,
@@ -34,13 +34,13 @@ final class URLImageView: UIImageView {
         )
     }
     
-    func loadImage(urlString urlString: String, completion: ((UIImage?, NSError?) -> Void)? = nil) {
+    func loadImage(urlString: String, completion: ((UIImage?, NSError?) -> Void)? = nil) {
         cancelLoadImage()
         if !activityViewHidden {
             activityView.startAnimating()
         }
         uuidString = OGImageProvider.sharedInstance.loadImage(urlString: urlString) { [weak self] image, error in
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 if self?.activityViewHidden == false {
                     self?.activityView.stopAnimating()
                 }

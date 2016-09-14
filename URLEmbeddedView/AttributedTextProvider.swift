@@ -11,34 +11,34 @@ import Foundation
 public final class AttributedTextProvider {
     static let sharedInstance = AttributedTextProvider()
     
-    private let TitleAttributeManager       = AttributeManager(style: .Title)
-    private let DomainAttributeManager      = AttributeManager(style: .Domain)
-    private let DescriptionAttributeManager = AttributeManager(style: .Description)
-    private let NoDataTitleAttributeManager = AttributeManager(style: .NoDataTitle)
+    fileprivate let TitleAttributeManager       = AttributeManager(style: .title)
+    fileprivate let DomainAttributeManager      = AttributeManager(style: .domain)
+    fileprivate let DescriptionAttributeManager = AttributeManager(style: .description)
+    fileprivate let NoDataTitleAttributeManager = AttributeManager(style: .noDataTitle)
     
     var didChangeValue: ((AttributeManager.Style, AttributeManager.Attribute, Any) -> Void)?
     
-    private init() {
-        self[.Title].didChangeValue       = { [weak self] in self?.didChangeValue?($0, $1, $2) }
-        self[.Domain].didChangeValue      = { [weak self] in self?.didChangeValue?($0, $1, $2) }
-        self[.Description].didChangeValue = { [weak self] in self?.didChangeValue?($0, $1, $2) }
-        self[.NoDataTitle].didChangeValue = { [weak self] in self?.didChangeValue?($0, $1, $2) }
+    fileprivate init() {
+        self[.title].didChangeValue       = { [weak self] in self?.didChangeValue?($0, $1, $2) }
+        self[.domain].didChangeValue      = { [weak self] in self?.didChangeValue?($0, $1, $2) }
+        self[.description].didChangeValue = { [weak self] in self?.didChangeValue?($0, $1, $2) }
+        self[.noDataTitle].didChangeValue = { [weak self] in self?.didChangeValue?($0, $1, $2) }
     }
     
     public subscript(style: AttributeManager.Style) -> AttributeManager {
         switch style {
-        case .Title       : return TitleAttributeManager
-        case .Domain      : return DomainAttributeManager
-        case .Description : return DescriptionAttributeManager
-        case .NoDataTitle : return NoDataTitleAttributeManager
+        case .title       : return TitleAttributeManager
+        case .domain      : return DomainAttributeManager
+        case .description : return DescriptionAttributeManager
+        case .noDataTitle : return NoDataTitleAttributeManager
         }
     }
     
-    func didChangeValue(closure: ((AttributeManager.Style, AttributeManager.Attribute, Any) -> Void)?) {
-        self[.Title].didChangeValue       = { closure?($0, $1, $2) }
-        self[.Domain].didChangeValue      = { closure?($0, $1, $2) }
-        self[.Description].didChangeValue = { closure?($0, $1, $2) }
-        self[.NoDataTitle].didChangeValue = { closure?($0, $1, $2) }
+    func didChangeValue(_ closure: ((AttributeManager.Style, AttributeManager.Attribute, Any) -> Void)?) {
+        self[.title].didChangeValue       = { closure?($0, $1, $2) }
+        self[.domain].didChangeValue      = { closure?($0, $1, $2) }
+        self[.description].didChangeValue = { closure?($0, $1, $2) }
+        self[.noDataTitle].didChangeValue = { closure?($0, $1, $2) }
     }
 }
 

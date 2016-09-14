@@ -33,17 +33,17 @@ import CryptoSwift
 
 class OGImageCacheManager {
     static let sharedInstance = OGImageCacheManager()
-    private static let TimeOfExpirationForOGImageCacheKey = "TimeOfExpirationForOGImageCache"
+    fileprivate static let TimeOfExpirationForOGImageCacheKey = "TimeOfExpirationForOGImageCache"
     
-    private let fileManager = NSFileManager()
-    private lazy var memoryCache: NSCache = {
+    fileprivate let fileManager = FileManager()
+    fileprivate lazy var memoryCache: NSCache = { () -> <<error type>> in 
         let cache = NSCache()
         cache.countLimit = 30
         return cache
     }()
-    private lazy var cacheDirectory: String = {
-        let paths = NSSearchPathForDirectoriesInDomains(.CachesDirectory, .UserDomainMask, true)
-        return (paths[paths.count-1] as NSString).stringByAppendingPathComponent("images")
+    fileprivate lazy var cacheDirectory: String = {
+        let paths = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)
+        return (paths[paths.count-1] as NSString).appendingPathComponent("images")
     }()
     
 //    var timeOfExpiration: NSTimeInterval {
@@ -58,45 +58,45 @@ class OGImageCacheManager {
 //        }
 //    }
     
-    private init() {
+    fileprivate init() {
         createDirectoriesIfNeeded()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.dynamicType.didReceiveMemoryWarning(_:)), name: UIApplicationDidReceiveMemoryWarningNotification , object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(type(of: self).didReceiveMemoryWarning(_:)), name: NSNotification.Name.UIApplicationDidReceiveMemoryWarning , object: nil)
     }
     
     deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationDidReceiveMemoryWarningNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIApplicationDidReceiveMemoryWarning, object: nil)
     }
     
-    dynamic func didReceiveMemoryWarning(notification: NSNotification) {
+    dynamic func didReceiveMemoryWarning(_ notification: Notification) {
         clearMemoryCache()
     }
 }
 
 //MARK: - Create directories
 extension OGImageCacheManager {
-    private func createDirectoriesIfNeeded() {
+    fileprivate func createDirectoriesIfNeeded() {
         createRootDirectoryIfNeeded()
         createSubDirectoriesIfNeeded()
     }
     
-    private func createRootDirectoryIfNeeded() {
+    fileprivate func createRootDirectoryIfNeeded() {
         var isDirectory: ObjCBool = false
-        let exists = fileManager.fileExistsAtPath(cacheDirectory, isDirectory: &isDirectory)
+        let exists = fileManager.fileExists(atPath: cacheDirectory, isDirectory: &isDirectory)
         if exists && isDirectory { return }
         do {
-            try fileManager.createDirectoryAtPath(cacheDirectory, withIntermediateDirectories: true, attributes: nil)
+            try fileManager.createDirectory(atPath: cacheDirectory, withIntermediateDirectories: true, attributes: nil)
         } catch {}
     }
     
-    private func createSubDirectoriesIfNeeded() {
+    fileprivate func createSubDirectoriesIfNeeded() {
         for i in 0..<16 {
             for j in 0..<16 {
                 let directoryName = String(format: "%@/%x%x", self.cacheDirectory, i, j)
                 var isDirectory: ObjCBool = false
-                let exists = fileManager.fileExistsAtPath(directoryName, isDirectory: &isDirectory)
+                let exists = fileManager.fileExists(atPath: directoryName, isDirectory: &isDirectory)
                 if exists && isDirectory { continue }
                 do {
-                    try fileManager.createDirectoryAtPath(directoryName, withIntermediateDirectories: true, attributes: nil)
+                    try fileManager.createDirectory(atPath: directoryName, withIntermediateDirectories: true, attributes: nil)
                 } catch {
                     continue
                 }
@@ -107,14 +107,14 @@ extension OGImageCacheManager {
 
 //MARK: - Read and write
 extension OGImageCacheManager {
-    private func pathForURLString(urlString: String) -> String {
+    fileprivate func pathForURLString(_ urlString: String) -> String {
         let md5String = urlString.md5()
         if md5String.characters.count < 2 { return cacheDirectory + "/" }
         return cacheDirectory + "/" +  md5String.substringToIndex(md5String.startIndex.advancedBy(2)) + "/" + md5String
     }
     
-    func cachedImage(urlString urlString: String) -> UIImage? {
-        if let image = memoryCache.objectForKey(urlString) as? UIImage {
+    func cachedImage(urlString: String) -> UIImage? {
+        if let image = memoryCache.object(forKey: urlString) as? UIImage {
             return image
         }
         if let image = UIImage(contentsOfFile: pathForURLString(urlString)) {
@@ -124,9 +124,9 @@ extension OGImageCacheManager {
         return nil
     }
     
-    func storeImage(image: UIImage, data: NSData, urlString: String) {
+    func storeImage(_ image: UIImage, data: Data, urlString: String) {
         memoryCache.setObject(image, forKey: urlString)
-        data.writeToFile(pathForURLString(urlString), atomically: false)
+        try? data.write(to: URL(fileURLWithPath: pathForURLString(urlString)), options: [])
     }
 }
 
@@ -138,12 +138,12 @@ extension OGImageCacheManager {
     
     func clearAllCache() {
         clearMemoryCache()
-        if !fileManager.fileExistsAtPath(cacheDirectory) {
+        if !fileManager.fileExists(atPath: cacheDirectory) {
             createDirectoriesIfNeeded()
             return
         }
         do {
-            try fileManager.removeItemAtPath(cacheDirectory)
+            try fileManager.removeItem(atPath: cacheDirectory)
             createDirectoriesIfNeeded()
         } catch {}
     }

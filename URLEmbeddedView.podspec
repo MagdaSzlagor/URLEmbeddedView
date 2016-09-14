@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'UIKit', 'CoreData', 'CoreGraphics'
-  s.dependency 'MisterFusion', '~> 1.0'
-  s.dependency 'Kanna', '~> 1.0'
-  s.dependency 'CryptoSwift', '~> 0.2'
+  s.dependency 'MisterFusion'
+  s.dependency 'Kanna'
+  s.dependency 'CryptoSwift'
 end

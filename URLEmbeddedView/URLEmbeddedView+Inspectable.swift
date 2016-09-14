@@ -20,12 +20,12 @@ extension URLEmbeddedView {
     }
     @IBInspectable public var borderColor: UIColor? {
         set {
-            layer.borderColor = newValue?.CGColor
+            layer.borderColor = newValue?.cgColor
             imageView.layer.borderColor = layer.borderColor
         }
         get {
             guard let cgColor = layer.borderColor else { return nil }
-            return UIColor(CGColor: cgColor)
+            return UIColor(cgColor: cgColor)
         }
     }
     @IBInspectable public var borderWidth: CGFloat {

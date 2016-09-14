@@ -22,24 +22,24 @@ final class LinkIconView: UIView {
         setNeedsDisplay()
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         // Drawing code
         let pdfPage = loadPdf()
         let context = UIGraphicsGetCurrentContext()
-        CGContextSaveGState(context)
-        let boxRect = CGPDFPageGetBoxRect(pdfPage, .MediaBox)
-        let xScale = bounds.size.width / boxRect.size.width
-        let yScale = bounds.size.height / boxRect.size.height
+        context?.saveGState()
+        let boxRect = pdfPage?.getBoxRect(.mediaBox)
+        let xScale = bounds.size.width / (boxRect?.size.width)!
+        let yScale = bounds.size.height / (boxRect?.size.height)!
         let scale = xScale < yScale ? xScale : yScale
-        CGContextTranslateCTM(context, 0.0, boxRect.size.height * yScale)
-        CGContextScaleCTM(context, scale, -scale);
-        CGContextDrawPDFPage(context, pdfPage);
-        CGContextRestoreGState(context)
+        context?.translateBy(x: 0.0, y: (boxRect?.size.height)! * yScale)
+        context?.scaleBy(x: scale, y: -scale);
+        context?.drawPDFPage(pdfPage!);
+        context?.restoreGState()
     }
     
-    private func loadPdf() -> CGPDFPage? {
-        let pdfURL = NSBundle(forClass: self.dynamicType).URLForResource("LinkIcon", withExtension: "pdf")
-        let pdfDocument = CGPDFDocumentCreateWithURL(pdfURL as CFURLRef?)
-        return CGPDFDocumentGetPage(pdfDocument, 1)
+    fileprivate func loadPdf() -> CGPDFPage? {
+        let pdfURL = Bundle(for: type(of: self)).url(forResource: "LinkIcon", withExtension: "pdf")
+        let pdfDocument = CGPDFDocument((pdfURL as CFURL?)!)
+        return pdfDocument?.page(at: 1)
     }
 }

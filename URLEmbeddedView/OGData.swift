@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 
 public final class OGData: NSManagedObject {
-    private enum PropertyName: String {
+    fileprivate enum PropertyName: String {
         case Description = "og:description"
         case Image       = "og:image"
         case SiteName    = "og:site_name"
@@ -19,15 +19,15 @@ public final class OGData: NSManagedObject {
         case Url         = "og:url"
     }
     
-    private lazy var URL: NSURL? = {
-        return NSURL(string: self.sourceUrl)
+    fileprivate lazy var URL: Foundation.URL? = {
+        return Foundation.URL(string: self.sourceUrl)
     }()
 
-    class func fetchOrInsertOGData(url url: String) -> OGData {
+    class func fetchOrInsertOGData(url: String) -> OGData {
         guard let ogData = fetchOGData(url: url) else {
             let managedObjectContext = OGDataCacheManager.sharedInstance.updateManagedObjectContext
-            let newOGData = NSEntityDescription.insertNewObjectForEntityForName("OGData", inManagedObjectContext: managedObjectContext) as! OGData
-            let date = NSDate()
+            let newOGData = NSEntityDescription.insertNewObject(forEntityName: "OGData", into: managedObjectContext) as! OGData
+            let date = Date()
             newOGData.createDate = date
             newOGData.updateDate = date
             return newOGData
@@ -35,17 +35,17 @@ public final class OGData: NSManagedObject {
         return ogData
     }
     
-    class func fetchOGData(url url: String) -> OGData? {
+    class func fetchOGData(url: String) -> OGData? {
         let managedObjectContext = OGDataCacheManager.sharedInstance.updateManagedObjectContext
         let fetchRequest = NSFetchRequest()
-        fetchRequest.entity = NSEntityDescription.entityForName("OGData", inManagedObjectContext: managedObjectContext)
+        fetchRequest.entity = NSEntityDescription.entity(forEntityName: "OGData", in: managedObjectContext)
         fetchRequest.fetchLimit = 1
         fetchRequest.predicate = NSPredicate(format: "sourceUrl = %@", url)
-        let fetchedList = (try? managedObjectContext.executeFetchRequest(fetchRequest)) as? [OGData]
+        let fetchedList = (try? managedObjectContext.fetch(fetchRequest)) as? [OGData]
         return fetchedList?.first
     }
     
-    func setValue(property property: String, content: String) {
+    func setValue(property: String, content: String) {
         guard let propertyName = PropertyName(rawValue: property) else { return }
         switch propertyName  {
         case .SiteName    : siteName        = content
@@ -53,12 +53,12 @@ public final class OGData: NSManagedObject {
         case .Title       : pageTitle       = content
         case .Image       : imageUrl        = content
         case .Url         : url             = content
-        case .Description : pageDescription = content.stringByReplacingOccurrencesOfString("\n", withString: " ")
+        case .Description : pageDescription = content.replacingOccurrences(of: "\n", with: " ")
         }
     }
     
     func save() {
-        updateDate = NSDate()
+        updateDate = Date()
         OGDataCacheManager.sharedInstance.saveContext(nil)
     }
 }

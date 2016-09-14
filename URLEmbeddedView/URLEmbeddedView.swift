@@ -9,39 +9,39 @@
 import UIKit
 import MisterFusion
 
-public class URLEmbeddedView: UIView {
-    private typealias ATP = AttributedTextProvider
+open class URLEmbeddedView: UIView {
+    fileprivate typealias ATP = AttributedTextProvider
     //MARK: - Static constants
-    private static let FaviconURL = "http://www.google.com/s2/favicons?domain="
+    fileprivate static let FaviconURL = "http://www.google.com/s2/favicons?domain="
     
     //MARK: - Properties
-    private let alphaView = UIView()
+    fileprivate let alphaView = UIView()
     
     let imageView = URLImageView()
-    private var imageViewWidthConstraint: NSLayoutConstraint?
+    fileprivate var imageViewWidthConstraint: NSLayoutConstraint?
     
-    private let titleLabel = UILabel()
-    private var titleLabelHeightConstraint: NSLayoutConstraint?
-    private let descriptionLabel = UILabel()
+    fileprivate let titleLabel = UILabel()
+    fileprivate var titleLabelHeightConstraint: NSLayoutConstraint?
+    fileprivate let descriptionLabel = UILabel()
     
-    private let domainConainter = UIView()
-    private var domainContainerHeightConstraint: NSLayoutConstraint?
-    private let domainLabel = UILabel()
-    private let domainImageView = URLImageView()
-    private var domainImageViewToDomainLabelConstraint: NSLayoutConstraint?
-    private var domainImageViewWidthConstraint: NSLayoutConstraint?
+    fileprivate let domainConainter = UIView()
+    fileprivate var domainContainerHeightConstraint: NSLayoutConstraint?
+    fileprivate let domainLabel = UILabel()
+    fileprivate let domainImageView = URLImageView()
+    fileprivate var domainImageViewToDomainLabelConstraint: NSLayoutConstraint?
+    fileprivate var domainImageViewWidthConstraint: NSLayoutConstraint?
     
-    private let activityView = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
-    private lazy var linkIconView: LinkIconView = {
+    fileprivate let activityView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    fileprivate lazy var linkIconView: LinkIconView = {
         return LinkIconView(frame: self.bounds)
     }()
     
-    private var URL: NSURL?
-    private var uuidString: String?
-    public let textProvider = AttributedTextProvider.sharedInstance
+    fileprivate var URL: Foundation.URL?
+    fileprivate var uuidString: String?
+    open let textProvider = AttributedTextProvider.sharedInstance
     
-    public var didTapHandler: ((URLEmbeddedView, NSURL?) -> Void)?
-    public var stopTaskWhenCancel = false {
+    open var didTapHandler: ((URLEmbeddedView, Foundation.URL?) -> Void)?
+    open var stopTaskWhenCancel = false {
         didSet {
             domainImageView.stopTaskWhenCancel = stopTaskWhenCancel
             imageView.stopTaskWhenCancel = stopTaskWhenCancel
@@ -64,7 +64,7 @@ public class URLEmbeddedView: UIView {
     
     public init(url: String, frame: CGRect) {
         super.init(frame: frame)
-        URL = NSURL(string: url)
+        URL = Foundation.URL(string: url)
         setInitialiValues()
         configureViews()
     }
@@ -74,28 +74,28 @@ public class URLEmbeddedView: UIView {
         setInitialiValues()
     }
     
-    public override func awakeFromNib() {
+    open override func awakeFromNib() {
         super.awakeFromNib()
         configureViews()
     }
     
-    public func prepareViewsForReuse() {
+    open func prepareViewsForReuse() {
         cancelLoad()
         imageView.image = nil
         titleLabel.attributedText = nil
         descriptionLabel.attributedText = nil
         domainLabel.attributedText = nil
         domainImageView.image = nil
-        linkIconView.hidden = true
+        linkIconView.isHidden = true
     }
     
-    private func setInitialiValues() {
-        borderColor = .lightGrayColor()
+    fileprivate func setInitialiValues() {
+        borderColor = .lightGray()
         borderWidth = 1
         cornerRaidus = 8
     }
     
-    private func configureViews() {
+    fileprivate func configureViews() {
         setNeedsDisplay()
         layoutIfNeeded()
         
@@ -110,9 +110,9 @@ public class URLEmbeddedView: UIView {
             linkIconView.Width |==| linkIconView.Height
         )
         linkIconView.clipsToBounds = true
-        linkIconView.hidden = true
+        linkIconView.isHidden = true
         
-        imageView.contentMode = .ScaleAspectFill
+        imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         addLayoutSubview(imageView, andConstraints:
             imageView.Top,
@@ -121,7 +121,7 @@ public class URLEmbeddedView: UIView {
         )
         changeImageViewWidthConstrain(nil)
         
-        titleLabel.numberOfLines = textProvider[.Title].numberOfLines
+        titleLabel.numberOfLines = textProvider[.title].numberOfLines
         addLayoutSubview(titleLabel, andConstraints:
             titleLabel.Top    |+| 8,
             titleLabel.Right  |-| 12,
@@ -136,7 +136,7 @@ public class URLEmbeddedView: UIView {
         )
         changeDomainContainerHeightConstraint()
         
-        descriptionLabel.numberOfLines = textProvider[.Description].numberOfLines
+        descriptionLabel.numberOfLines = textProvider[.description].numberOfLines
         addLayoutSubview(descriptionLabel, andConstraints:
             descriptionLabel.Right  |-| 12,
             descriptionLabel.Height |>=| 0,
@@ -153,7 +153,7 @@ public class URLEmbeddedView: UIView {
         )
         changeDomainImageViewWidthConstraint(nil)
         
-        domainLabel.numberOfLines = textProvider[.Domain].numberOfLines
+        domainLabel.numberOfLines = textProvider[.domain].numberOfLines
         domainConainter.addLayoutSubview(domainLabel, andConstraints:
             domainLabel.Top,
             domainLabel.Right,
@@ -169,7 +169,7 @@ public class URLEmbeddedView: UIView {
             activityView.Height |==| 30
         )
         
-        alphaView.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.2)
+        alphaView.backgroundColor = UIColor.black.withAlphaComponent(0.2)
         alphaView.alpha = 0
         addLayoutSubview(alphaView, andConstraints:
             alphaView.Top,
@@ -179,22 +179,22 @@ public class URLEmbeddedView: UIView {
         )
     }
     
-    public override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         alphaView.alpha = 1
     }
     
-    public override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
+    open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         alphaView.alpha = 0
     }
     
-    public override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         alphaView.alpha = 0
         didTapHandler?(self, URL)
     }
 }
 
 extension URLEmbeddedView {
-    private func changeImageViewWidthConstrain(constant: CGFloat?) {
+    fileprivate func changeImageViewWidthConstrain(_ constant: CGFloat?) {
         if let constraint = imageViewWidthConstraint {
             removeConstraint(constraint)
         }
@@ -207,7 +207,7 @@ extension URLEmbeddedView {
         imageViewWidthConstraint = addLayoutConstraint(misterFusion)
     }
     
-    private func changeDomainImageViewWidthConstraint(constant: CGFloat?) {
+    fileprivate func changeDomainImageViewWidthConstraint(_ constant: CGFloat?) {
         if let constraint = domainImageViewWidthConstraint {
             removeConstraint(constraint)
         }
@@ -220,8 +220,8 @@ extension URLEmbeddedView {
         domainImageViewWidthConstraint = addLayoutConstraint(misterFusion)
     }
     
-    private func changeDomainImageViewToDomainLabelConstraint(constant: CGFloat?) {
-        let constant = constant ?? (textProvider[.Domain].font.lineHeight / 5)
+    fileprivate func changeDomainImageViewToDomainLabelConstraint(_ constant: CGFloat?) {
+        let constant = constant ?? (textProvider[.domain].font.lineHeight / 5)
         if let constraint = domainImageViewToDomainLabelConstraint {
             if constant == constraint.constant { return }
             removeConstraint(constraint)
@@ -230,8 +230,8 @@ extension URLEmbeddedView {
         domainImageViewToDomainLabelConstraint = addLayoutConstraint(misterFusion)
     }
     
-    private func changeTitleLabelHeightConstraint() {
-        let constant = textProvider[.Title].font.lineHeight
+    fileprivate func changeTitleLabelHeightConstraint() {
+        let constant = textProvider[.title].font.lineHeight
         if let constraint = titleLabelHeightConstraint {
             if constant == constraint.constant { return }
             removeConstraint(constraint)
@@ -239,8 +239,8 @@ extension URLEmbeddedView {
         titleLabelHeightConstraint = addLayoutConstraint(titleLabel.Height |>=| constant)
     }
     
-    private func changeDomainContainerHeightConstraint() {
-        let constant = textProvider[.Domain].font.lineHeight
+    fileprivate func changeDomainContainerHeightConstraint() {
+        let constant = textProvider[.domain].font.lineHeight
         if let constraint = domainContainerHeightConstraint {
             if constant == constraint.constant { return }
             removeConstraint(constraint)
@@ -250,51 +250,51 @@ extension URLEmbeddedView {
 }
 
 extension URLEmbeddedView {
-    private func handleTextProviderChanged(style: AttributeManager.Style, attribute: AttributeManager.Attribute, value: Any) {
+    fileprivate func handleTextProviderChanged(_ style: AttributeManager.Style, attribute: AttributeManager.Attribute, value: Any) {
         switch style {
-        case .Title:       didChangeTitleAttirbute(attribute, value: value)
-        case .Domain:      didChangeDomainAttirbute(attribute, value: value)
-        case .Description: didChangeDescriptionAttirbute(attribute, value: value)
-        case .NoDataTitle: didChangeNoDataTitleAttirbute(attribute, value: value)
+        case .title:       didChangeTitleAttirbute(attribute, value: value)
+        case .domain:      didChangeDomainAttirbute(attribute, value: value)
+        case .description: didChangeDescriptionAttirbute(attribute, value: value)
+        case .noDataTitle: didChangeNoDataTitleAttirbute(attribute, value: value)
         }
     }
     
-    private func didChangeTitleAttirbute(attribute: AttributeManager.Attribute, value: Any) {
+    fileprivate func didChangeTitleAttirbute(_ attribute: AttributeManager.Attribute, value: Any) {
         switch attribute {
-        case .Font: changeDomainContainerHeightConstraint()
-        case .FontColor: break
-        case .NumberOfLines: break
+        case .font: changeDomainContainerHeightConstraint()
+        case .fontColor: break
+        case .numberOfLines: break
         }
     }
     
-    private func didChangeDomainAttirbute(attribute: AttributeManager.Attribute, value: Any) {
+    fileprivate func didChangeDomainAttirbute(_ attribute: AttributeManager.Attribute, value: Any) {
         switch attribute {
-        case .Font: changeDomainContainerHeightConstraint()
-        case .FontColor: break
-        case .NumberOfLines: break
+        case .font: changeDomainContainerHeightConstraint()
+        case .fontColor: break
+        case .numberOfLines: break
         }
     }
     
-    private func didChangeDescriptionAttirbute(attribute: AttributeManager.Attribute, value: Any) {
+    fileprivate func didChangeDescriptionAttirbute(_ attribute: AttributeManager.Attribute, value: Any) {
         switch attribute {
-        case .Font: break
-        case .FontColor: break
-        case .NumberOfLines: break
+        case .font: break
+        case .fontColor: break
+        case .numberOfLines: break
         }
     }
     
-    private func didChangeNoDataTitleAttirbute(attribute: AttributeManager.Attribute, value: Any) {
+    fileprivate func didChangeNoDataTitleAttirbute(_ attribute: AttributeManager.Attribute, value: Any) {
         switch attribute {
-        case .Font: changeTitleLabelHeightConstraint()
-        case .FontColor: break
-        case .NumberOfLines: break
+        case .font: changeTitleLabelHeightConstraint()
+        case .fontColor: break
+        case .numberOfLines: break
         }
     }
 }
 
 extension URLEmbeddedView {
-    public func loadURL(urlString: String, completion: ((NSError?) -> Void)? = nil) {
-        guard let URL = NSURL(string: urlString) else {
+    public func loadURL(_ urlString: String, completion: ((NSError?) -> Void)? = nil) {
+        guard let URL = Foundation.URL(string: urlString) else {
             completion?(nil)
             return
         }
@@ -302,37 +302,37 @@ extension URLEmbeddedView {
         load(completion)
     }
     
-    public func load(completion: ((NSError?) -> Void)? = nil) {
+    public func load(_ completion: ((NSError?) -> Void)? = nil) {
         guard let URL = URL else { return }
         prepareViewsForReuse()
         activityView.startAnimating()
         uuidString = OGDataProvider.sharedInstance.fetchOGData(urlString: URL.absoluteString) { [weak self] ogData, error in
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 self?.activityView.stopAnimating()
                 if let error = error {
                     self?.imageView.image = nil
-                    self?.titleLabel.attributedText = self?.textProvider[.NoDataTitle].attributedText(URL.absoluteString)
+                    self?.titleLabel.attributedText = self?.textProvider[.noDataTitle].attributedText(URL.absoluteString)
                     self?.descriptionLabel.attributedText = nil
-                    self?.domainLabel.attributedText = self?.textProvider[.Domain].attributedText(URL.host ?? "")
+                    self?.domainLabel.attributedText = self?.textProvider[.domain].attributedText(URL.host ?? "")
                     self?.changeDomainImageViewWidthConstraint(0)
                     self?.changeDomainImageViewToDomainLabelConstraint(0)
                     self?.changeImageViewWidthConstrain(nil)
-                    self?.linkIconView.hidden = false
+                    self?.linkIconView.isHidden = false
                     self?.layoutIfNeeded()
                     completion?(error)
                     return
                 }
                 
-                self?.linkIconView.hidden = true
+                self?.linkIconView.isHidden = true
                 if ogData.pageTitle.isEmpty {
-                    self?.titleLabel.attributedText = self?.textProvider[.NoDataTitle].attributedText(URL.absoluteString)
+                    self?.titleLabel.attributedText = self?.textProvider[.noDataTitle].attributedText(URL.absoluteString)
                 } else {
-                    self?.titleLabel.attributedText = self?.textProvider[.Title].attributedText(ogData.pageTitle)
+                    self?.titleLabel.attributedText = self?.textProvider[.title].attributedText(ogData.pageTitle)
                 }
-                self?.descriptionLabel.attributedText = self?.textProvider[.Description].attributedText(ogData.pageDescription)
+                self?.descriptionLabel.attributedText = self?.textProvider[.description].attributedText(ogData.pageDescription)
                 if !ogData.imageUrl.isEmpty {
                     self?.imageView.loadImage(urlString: ogData.imageUrl) {
-                        if let _ = $0 where $1 == nil {
+                        if let _ = $0 , $1 == nil {
                             self?.changeImageViewWidthConstrain(nil)
                         } else {
                             self?.changeImageViewWidthConstrain(0)
@@ -344,10 +344,10 @@ extension URLEmbeddedView {
                     self?.imageView.image = nil
                 }
                 let host = URL.host ?? ""
-                self?.domainLabel.attributedText = self?.textProvider[.Domain].attributedText(host)
-                let faciconURL = (self?.dynamicType.FaviconURL ?? "") + host
+                self?.domainLabel.attributedText = self?.textProvider[.domain].attributedText(host)
+                let faciconURL = (type(of: self?).FaviconURL ?? "") + host
                 self?.domainImageView.loadImage(urlString: faciconURL) {
-                    if let _ = $0 where $1 == nil {
+                    if let _ = $0 , $1 == nil {
                         self?.changeDomainImageViewWidthConstraint(nil)
                         self?.changeDomainImageViewToDomainLabelConstraint(nil)
                     } else {

@@ -8,21 +8,21 @@
 
 import Foundation
 
-extension NSUserDefaults {
-    private static let UpdateIntervalForOGDataCacheKey = "UpdateIntervalForOGDataCache"
+extension UserDefaults {
+    fileprivate static let UpdateIntervalForOGDataCacheKey = "UpdateIntervalForOGDataCache"
     
-    var updateIntervalForOGData: NSTimeInterval? {
+    var updateIntervalForOGData: TimeInterval? {
         get {
-            let ud = NSUserDefaults.standardUserDefaults()
-            guard let interval = (ud.objectForKey(self.dynamicType.UpdateIntervalForOGDataCacheKey) as? NSNumber)?.doubleValue else {
+            let ud = UserDefaults.standard
+            guard let interval = (ud.object(forKey: type(of: self).UpdateIntervalForOGDataCacheKey) as? NSNumber)?.doubleValue else {
                 return nil
             }
             return interval
         }
         set {
             guard let interval = newValue else { return }
-            let ud = NSUserDefaults.standardUserDefaults()
-            ud.setObject(NSNumber(double: interval), forKey: self.dynamicType.UpdateIntervalForOGDataCacheKey)
+            let ud = UserDefaults.standard
+            ud.set(NSNumber(value: interval as Double), forKey: type(of: self).UpdateIntervalForOGDataCacheKey)
             ud.synchronize()
         }
     }

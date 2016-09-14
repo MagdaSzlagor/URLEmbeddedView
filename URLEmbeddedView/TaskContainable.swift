@@ -12,8 +12,8 @@ protocol TaskContainable {
     associatedtype Completion
     
     var uuidString: String { get }
-    var task: NSURLSessionDataTask { get }
+    var task: URLSessionDataTask { get }
     var completion: Completion? { get set }
     
-    init(uuidString: String, task: NSURLSessionDataTask, completion: Completion?)
+    init(uuidString: String, task: URLSessionDataTask, completion: Completion?)
 }

@@ -8,54 +8,54 @@
 
 import Foundation
 
-extension NSTimeInterval {
-    public var minutes: NSTimeInterval {
+extension TimeInterval {
+    public var minutes: TimeInterval {
         return self * 60
     }
     
-    public var hours: NSTimeInterval {
+    public var hours: TimeInterval {
         return minutes * 60
     }
     
-    public var days: NSTimeInterval {
+    public var days: TimeInterval {
         return hours * 24
     }
     
-    public var weeks: NSTimeInterval {
+    public var weeks: TimeInterval {
         return days * 7
     }
     
-    public var months: NSTimeInterval {
+    public var months: TimeInterval {
         return days * 30
     }
     
-    public var years: NSTimeInterval {
+    public var years: TimeInterval {
         return days * 365
     }
 }
 
 extension NSNumber {
-    public class func minutes(time: NSTimeInterval) -> NSTimeInterval {
+    public class func minutes(_ time: TimeInterval) -> TimeInterval {
         return time.minutes
     }
     
-    public class func hours(time: NSTimeInterval) -> NSTimeInterval {
+    public class func hours(_ time: TimeInterval) -> TimeInterval {
         return time.hours
     }
     
-    public class func days(time: NSTimeInterval) -> NSTimeInterval {
+    public class func days(_ time: TimeInterval) -> TimeInterval {
         return time.days
     }
     
-    public class func weeks(time: NSTimeInterval) -> NSTimeInterval {
+    public class func weeks(_ time: TimeInterval) -> TimeInterval {
         return time.weeks
     }
     
-    public class func months(time: NSTimeInterval) -> NSTimeInterval {
+    public class func months(_ time: TimeInterval) -> TimeInterval {
         return time.months
     }
     
-    public class func years(time: NSTimeInterval) -> NSTimeInterval {
+    public class func years(_ time: TimeInterval) -> TimeInterval {
         return time.years
     }
 }

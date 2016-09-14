@@ -44,10 +44,10 @@ private class TaskContainer: TaskContainable {
     typealias Completion = ((OGData, NSError?) -> Void)
     
     let uuidString: String
-    let task: NSURLSessionDataTask
+    let task: URLSessionDataTask
     var completion: Completion?
     
-    required init(uuidString: String, task: NSURLSessionDataTask, completion: Completion?) {
+    required init(uuidString: String, task: URLSessionDataTask, completion: Completion?) {
         self.uuidString = uuidString
         self.task = task
         self.completion = completion
@@ -58,28 +58,28 @@ public final class OGDataProvider: NSObject {
     
     //MARK: Static constants
     public static let sharedInstance = OGDataProvider()
-    private static let UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Safari/601.1.42"
-    private static let MetaTagKey = "meta"
-    private static let PropertyKey = "property"
-    private static let ContentKey = "content"
-    private static let PropertyPrefix = "og:"
+    fileprivate static let UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Safari/601.1.42"
+    fileprivate static let MetaTagKey = "meta"
+    fileprivate static let PropertyKey = "property"
+    fileprivate static let ContentKey = "content"
+    fileprivate static let PropertyPrefix = "og:"
     
     //MARK: - Properties
-    private let session = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration())
-    private var taskContainers: [String : TaskContainer] = [:]
+    fileprivate let session = URLSession(configuration: URLSessionConfiguration.default)
+    fileprivate var taskContainers: [String : TaskContainer] = [:]
     
-    private override init() {
+    fileprivate override init() {
         super.init()
     }
     
-    public var updateInterval: NSTimeInterval {
+    public var updateInterval: TimeInterval {
         get { return OGDataCacheManager.sharedInstance.updateInterval }
         set { OGDataCacheManager.sharedInstance.updateInterval = newValue }
     }
 }
 
 extension OGDataProvider {
-    public func fetchOGData(urlString urlString: String, completion: ((OGData, NSError?) -> Void)? = nil) -> String? {
+    public func fetchOGData(urlString: String, completion: ((OGData, NSError?) -> Void)? = nil) -> String? {
         let ogData = OGData.fetchOrInsertOGData(url: urlString)
         if !ogData.sourceUrl.isEmpty {
             completion?(ogData, nil)
@@ -88,24 +88,24 @@ extension OGDataProvider {
             }
         }
         ogData.sourceUrl = urlString
-        guard let URL = NSURL(string: urlString) else {
+        guard let URL = URL(string: urlString) else {
             completion?(ogData, NSError(domain: "can not create NSURL with \"\(urlString)\"", code: 9999, userInfo: nil))
             return nil
         }
-        let request = NSMutableURLRequest(URL: URL)
-        request.setValue(self.dynamicType.UserAgent, forHTTPHeaderField: "User-Agent")
+        let request = NSMutableURLRequest(url: URL)
+        request.setValue(type(of: self).UserAgent, forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 5
-        let uuidString = NSUUID().UUIDString
-        let task = session.dataTaskWithRequest(request) { [weak self] data, response, error in
+        let uuidString = UUID().uuidString
+        let task = session.dataTask(with: request, completionHandler: { [weak self] data, response, error in
             let completion = self?.taskContainers[uuidString]?.completion
-            self?.taskContainers.removeValueForKey(uuidString)
+            self?.taskContainers.removeValue(forKey: uuidString)
             
             if let error = error {
                 completion?(ogData, error)
                 return
             }
             let encodingName = response?.textEncodingName
-            let encodingType = (encodingName == nil) ? NSUTF8StringEncoding : CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding(encodingName))
+            let encodingType = (encodingName == nil) ? String.Encoding.utf8 : CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding(encodingName))
             guard let data = data,
                   let html = Kanna.HTML(html: data, encoding: encodingType),
                   let header = html.head else {
@@ -116,7 +116,7 @@ extension OGDataProvider {
             for metaTag in metaTags {
                 guard let property = metaTag[OGDataProvider.PropertyKey],
                       let content = metaTag[OGDataProvider.ContentKey]
-                      where property.hasPrefix(OGDataProvider.PropertyPrefix) else {
+                      , property.hasPrefix(OGDataProvider.PropertyPrefix) else {
                     continue
                 }
                 ogData.setValue(property: property, content: content)
@@ -124,13 +124,13 @@ extension OGDataProvider {
             ogData.save()
             
             completion?(ogData, nil)
-        }
+        }) 
         taskContainers[uuidString] = TaskContainer(uuidString: uuidString, task: task, completion: completion)
         task.resume()
         return uuidString
     }
     
-    public func deleteOGData(urlString urlString: String, completion: ((NSError?) -> Void)? = nil) {
+    public func deleteOGData(urlString: String, completion: ((NSError?) -> Void)? = nil) {
         guard let ogData = OGData.fetchOGData(url: urlString) else {
             completion?(NSError(domain: "no object matches with \"\(urlString)\"", code: 9999, userInfo: nil))
             return
@@ -138,15 +138,15 @@ extension OGDataProvider {
         deleteOGData(ogData, completion: completion)
     }
     
-    public func deleteOGData(ogData: OGData, completion: ((NSError?) -> Void)? = nil) {
+    public func deleteOGData(_ ogData: OGData, completion: ((NSError?) -> Void)? = nil) {
         OGDataCacheManager.sharedInstance.delete(ogData, completion: completion)
     }
     
-    func cancelLoad(uuidString: String, stopTask: Bool) {
+    func cancelLoad(_ uuidString: String, stopTask: Bool) {
         taskContainers[uuidString]?.completion = nil
         if stopTask {
             taskContainers[uuidString]?.task.cancel()
         }
-        taskContainers.removeValueForKey(uuidString)
+        taskContainers.removeValue(forKey: uuidString)
     }
 }
